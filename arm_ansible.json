@@ -1,0 +1,199 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualNetworkResourceGroup": {
+            "defaultValue": "rg-aus-npd-api",
+            "type": "string"
+        },
+        "virtualNetworkName":{
+            "defaultValue": "vn-aus-dev-api",
+            "type": "string"
+        },
+        "subnetName":{
+            "defaultValue": "sn-aus-dev-api-app",
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "ansible"
+        },
+        "sshPublicKey": {
+            "type": "string",
+            "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDJ8FQohGN0w7tny2MKiHowVkg7btnEgTg956WXqhl9WAMstPRbFoQrtG+2WBUGfovUwsGQe0GUMh7lc/EnS56WMbzxuglsqwdh9YAED98a8H8L4ip1XmnrCFxKrqfpe2/hzNn04MHBqfM4lTWCiWjaKGVYLIQiNfGDY6j8Xvb89tk7/1xtITYldSlhL36HJynV0mZydX7sBXrCZ3jusX2nNAyeZvTeLmwFtYUzB4sFB014VqmNzh3QMyYhaZB2UAjH4QnFUWnHvdN44tN8hqq1NSoOv6qgr0GmoADmcxJ4OvR9rssgyVWdnuQ5fxfGRrKubT50OAlDrIX981zctU51"
+        },
+        "virtualMachineNameBase": {
+            "type": "string",
+            "defaultValue": "ansible"
+        },
+        "scriptURL": {
+            "defaultValue": "https://saausnpdapirepo.blob.core.windows.net/public/ansible_install_kong.sh",
+            "type": "string"
+        },
+        "ansibleVersion": {
+            "defaultValue": "latest",
+            "type": "string"
+        }
+    },
+    "variables": {
+        "unique_base": "[substring(uniqueString(resourceGroup().id), 0, 6)]",
+        "networkSecurityGroupName": "[concat('nsg-',parameters('virtualMachineNameBase'),'-',variables('unique_base'))]",
+        "networkInterfaceName": "[concat('nic-',parameters('virtualMachineNameBase'),'-',variables('unique_base'))]",
+        "virtualMachineName": "[concat('vm-',parameters('virtualMachineNameBase'),'-',variables('unique_base'))]"
+    },
+    "resources": [
+        {
+            "comments": "CREATE THE NETWORK SECURITY GROUP",
+            "name": "[variables('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "SSH",
+                        "properties": {
+                            "priority": 300,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "22"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "comments": "CREATE THE NETWORK INTERFACE",
+            "name": "[variables('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-10-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                }
+            }
+        },
+        {
+            "comments": "CREATE THE VIRTUAL MACHINE",
+            "name": "[variables('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-10-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2s"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "OpenLogic",
+                        "offer": "CentOS",
+                        "sku": "7.6",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('sshPublicKey')]"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "comments": "CREATE THE SCHEDULE",
+            "name": "[concat('shutdown-computevm-', variables('virtualMachineName'))]",
+            "type": "Microsoft.DevTestLab/schedules",
+            "apiVersion": "2018-09-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
+            ],
+            "properties": {
+                "status": "Enabled",
+                "taskType": "ComputeVmShutdownTask",
+                "dailyRecurrence": {
+                    "time": "19:00"
+                },
+                "timeZoneId": "AUS Eastern Standard Time",
+                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachineName'))]",
+                "notificationSettings": {
+                    "status": "Disabled",
+                    "notificationLocale": "en",
+                    "timeInMinutes": "30"
+                }
+            }
+        },
+        {
+            "comments": "CREATE THE VM EXTENSION",
+            "name": "[concat(variables('virtualMachineName'),'/installcustomscript')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2018-10-01",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+              "settings": {
+                "fileUris": [
+                    "[parameters('scriptURL')]"
+                ],
+                "commandToExecute": "[concat('bash', ' ', last(split(first(split(parameters('scriptURL'),'?')),'/')),' ', parameters('ansibleVersion'), '> custom_script_result.txt 2>&1')]"
+              }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
+    }
+}
