@@ -27,7 +27,7 @@
             "defaultValue": "ansible"
         },
         "scriptURL": {
-            "defaultValue": "https://saausnpdapirepo.blob.core.windows.net/public/ansible_install_kong.sh",
+            "defaultValue": "https://raw.githubusercontent.com/siaomingjeng/ansiblebastincreation/master/ansible_install.sh",
             "type": "string"
         },
         "ansibleVersion": {
