@@ -193,7 +193,7 @@
     "outputs": {
         "adminUserName": {
             "type": "string",
-            "value": "[concat('ssh', parameters('adminUserName'),'@',reference(resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName')),'2018-10-01').ipConfigurations[0].properties.privateIPAddress)]"
+            "value": "[concat('ssh ', parameters('adminUserName'),'@',reference(resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName')),'2018-10-01').ipConfigurations[0].properties.privateIPAddress)]"
         }
     }
 }
