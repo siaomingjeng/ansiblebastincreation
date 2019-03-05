@@ -13,7 +13,7 @@
 - Subnet Name: The name the of the existing subnet;
 - Admin Username: The Linux login username;
 - SSH Public Key: The SSH public key used for login;
-- Virtual Machine Name Base: The basename used to form the final VM name 'vm-<base>-<random string>';
+- Virtual Machine Name Base: The basename used to form the final VM name \'vm-\<base\>-\<random string\>\';
 - Script URL: The script to run once VM is provisioned;
 - Ansible Version: The first parameter sent to script.
 
