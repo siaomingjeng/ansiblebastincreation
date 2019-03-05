@@ -14,7 +14,7 @@
             "defaultValue": "sn-aus-dev-api-app",
             "type": "string"
         },
-        "adminUsername": {
+        "adminUserName": {
             "type": "string",
             "defaultValue": "ansible"
         },
@@ -128,13 +128,13 @@
                 },
                 "osProfile": {
                     "computerName": "[variables('virtualMachineName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminUserName": "[parameters('adminUserName')]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": true,
                         "ssh": {
                             "publicKeys": [
                                 {
-                                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                    "path": "[concat('/home/', parameters('adminUserName'), '/.ssh/authorized_keys')]",
                                     "keyData": "[parameters('sshPublicKey')]"
                                 }
                             ]
@@ -191,9 +191,9 @@
         }
     ],
     "outputs": {
-        "adminUsername": {
+        "adminUserName": {
             "type": "string",
-            "value": "[parameters('adminUsername')]"
+            "value": "[parameters('adminUserName')]"
         }
     }
 }
