@@ -18,7 +18,7 @@
             "type": "string",
             "defaultValue": "ansible"
         },
-        "sshPublicKey": {
+        "SSHPublicKey": {
             "type": "string",
             "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDJ8FQohGN0w7tny2MKiHowVkg7btnEgTg956WXqhl9WAMstPRbFoQrtG+2WBUGfovUwsGQe0GUMh7lc/EnS56WMbzxuglsqwdh9YAED98a8H8L4ip1XmnrCFxKrqfpe2/hzNn04MHBqfM4lTWCiWjaKGVYLIQiNfGDY6j8Xvb89tk7/1xtITYldSlhL36HJynV0mZydX7sBXrCZ3jusX2nNAyeZvTeLmwFtYUzB4sFB014VqmNzh3QMyYhaZB2UAjH4QnFUWnHvdN44tN8hqq1NSoOv6qgr0GmoADmcxJ4OvR9rssgyVWdnuQ5fxfGRrKubT50OAlDrIX981zctU51"
         },
@@ -135,7 +135,7 @@
                             "publicKeys": [
                                 {
                                     "path": "[concat('/home/', parameters('adminUserName'), '/.ssh/authorized_keys')]",
-                                    "keyData": "[parameters('sshPublicKey')]"
+                                    "keyData": "[parameters('SSHPublicKey')]"
                                 }
                             ]
                         }
