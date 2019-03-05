@@ -17,4 +17,6 @@
 - Script URL: The script to run once VM is provisioned;
 - Ansible Version: The first parameter sent to script.
 
-
+## Locations:
+- Log: /var/log/azure/custom-script/handler.log
+- Script Output: /var/lib/waagent/custom-script/download/0/
