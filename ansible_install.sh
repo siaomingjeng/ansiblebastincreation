@@ -95,8 +95,8 @@ sudo yum install -y https://github.com/siaomingjeng/ansiblebastincreation/raw/ma
 echo -e '\033[35;5m  Ansible PostgreSQL dependencies . . . \033[0m'
 sudo pip install psycopg2
 echo -e '\033[35;5m  Install PostgreSQL10 client . . . \033[0m'
-sudo yum install -y https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
-sudo yum install -y postgresql10
+sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+sudo yum install -y postgresql12
 
 echo -e '\033[35;5m  Finished!!! \033[0m'
 
