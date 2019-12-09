@@ -13,7 +13,7 @@ echo -e '\033[35;5m Groupinstall Development Tools . . . \033[0m'
 sudo yum groupinstall 'Development Tools' -y
 
 echo -e '\033[35;5m Install python-pip python-devel expect. . . \033[0m'
-sudo yum install python-pip python-devel expect -y
+sudo yum install python-pip python-devel postgresql-devel expect -y
 
 echo -e '\033[35;5m Update pip . . . \033[0m'
 sudo pip install --upgrade pip
