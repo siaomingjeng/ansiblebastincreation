@@ -87,9 +87,10 @@ fi
 sudo systemctl restart sshd
 
 # Install git 2.17 from StorageAccount saausdevrepo as minimum requirement of VSTS is 2.0
-echo '\033[35;5m Install git 2.17 from Storage Account saausdevrepo . . . \033[0m'
-sudo yum remove -y git
-sudo yum install -y https://github.com/siaomingjeng/ansiblebastincreation/raw/master/git-2.20.1-1.el7.x86_64.rpm
+#echo '\033[35;5m Install git 2.17 from Storage Account saausdevrepo . . . \033[0m'
+#sudo yum remove -y git
+#sudo yum install -y https://github.com/siaomingjeng/ansiblebastincreation/raw/master/git-2.20.1-1.el7.x86_64.rpm
+sudo yum install -y git
 
 # Pre-requisites for Ansible PostgreSQL module
 echo -e '\033[35;5m  Ansible PostgreSQL dependencies . . . \033[0m'
